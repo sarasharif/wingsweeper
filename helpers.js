@@ -33,6 +33,7 @@ const generateGameBoard = (boxCount, mineIndices) => {
   });
 
   let board = makeBoardFromBoxes(boxes);
+
   board = incrementNeighbors(board);
   return board;
 };
@@ -93,12 +94,27 @@ const getAllNeighbors = (i, j) => {
 };
 
 const getAdjacentNeighbors = (i, j) => {
-  return [[i, j - 1], [i - 1, j], [i + 1, j], [i, j + 1]];
+  return [
+    { x: i, y: j - 1 },
+    { x: i - 1, y: j },
+    { x: i + 1, y: j },
+    { x: i, y: j + 1 }
+  ];
 };
 
-const clickBox = (x, y, action) => {
-  // is x,y within the board, and closed
-  //
+const clickBox = (x, y, action = "open") => {
+  if (action === "open") {
+    if (CURRENT_GAME.board[x][y].value === -1) {
+      CURRENT_GAME.status = GAME_STATUS.LOST;
+    } else if (CURRENT_GAME.board[x][y].value === 0) {
+      // Call getAdjacent Neighbors, push neighbors(value=0) into stack
+      // For each box in stack: pop, call adjacent neighbors, while stack.length > 0;
+    }
+    CURRENT_GAME.board[x][y].status = BOX_STATUS.OPEN;
+  }
+  if (action === "flagged") {
+    CURRENT_GAME.board[x][y].status = BOX_STATUS.FLAGGED;
+  }
 };
 
 module.exports = {

@@ -6,15 +6,21 @@ const app = express();
 app.use(bodyParser.json());
 
 // GLOBAL VARIABLES
-CURRENT_GAME = {
-  board: [],
-  status: "this is the status"
+GAME_STATUS = {
+  LOST: "lost",
+  WON: "won",
+  IN_PLAY: "inPlay"
 };
 
 BOX_STATUS = {
   CLOSED: "closed",
   OPEN: "open",
   FLAGGED: "flagged"
+};
+
+CURRENT_GAME = {
+  board: [],
+  status: GAME_STATUS.IN_PLAY
 };
 
 app.post("/game", (req, res) => {
@@ -30,12 +36,12 @@ app.post("/game", (req, res) => {
 });
 
 app.post("/click", (req, res) => {
-  // requires x,y
-  // requires click or flag (default to click)
-  // returns grid
-  // returns gameStatus = ongoing, lost, won
   const { x, y, action } = req.body;
-  const game = postClickHandler(x, y, action);
+  try {
+    postClickHandler(x, y, action);
+  } catch (err) {
+    res.send({ error: err.message });
+  }
   res.send({ game: CURRENT_GAME });
 });
 

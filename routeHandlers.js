@@ -8,15 +8,14 @@ const postGameHandler = (boardSize, mineCount) => {
 };
 
 const postClickHandler = (x, y, action) => {
-  // validate coordinates on closed box
-  // return CURRENT GAME
-  return { message: `running postClickHandler with ${x}, ${y}, ${action}` };
+  const n = CURRENT_GAME.board.length;
+  if (x < 0 || y < 0 || x >= n || y >= n) {
+    throw new Error("Those are not valid coordinates");
+  }
+  clickBox(x, y, action);
 };
-
-const getGameHandler = () => ({ game: getCurrentGame() });
 
 module.exports = {
   postGameHandler,
-  postClickHandler,
-  getGameHandler
+  postClickHandler
 };
