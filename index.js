@@ -1,10 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const {
-  postGameHandler,
-  postClickHandler,
-  getGameHandler
-} = require("./routeHandlers");
+const { postGameHandler, postClickHandler } = require("./routeHandlers");
 
 const app = express();
 app.use(bodyParser.json());
@@ -44,7 +40,6 @@ app.post("/click", (req, res) => {
 });
 
 app.get("/game", (req, res) => {
-  // const { game } = getGameHandler();
   res.send({ game: CURRENT_GAME });
 });
 

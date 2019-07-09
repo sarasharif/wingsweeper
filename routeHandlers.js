@@ -8,9 +8,7 @@ const postGameHandler = (boardSize, mineCount) => {
 };
 
 const postClickHandler = (x, y, action) => {
-  // access CURRENT_GAME
   // validate coordinates on closed box
-  // generate new board
   // return CURRENT GAME
   return { message: `running postClickHandler with ${x}, ${y}, ${action}` };
 };

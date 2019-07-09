@@ -19,18 +19,21 @@ const generateMineIndices = (mineCount, boxCount) => {
 };
 
 const generateGameBoard = (boxCount, mineIndices) => {
+  // create mineless board
   const boxes = new Array(boxCount).fill().map(item => {
     return {
       status: BOX_STATUS.CLOSED,
       value: 0
     };
   });
+
+  // add mines
   mineIndices.forEach(index => {
     boxes[index].value = -1;
   });
 
-  const board = makeBoardFromBoxes(boxes);
-
+  let board = makeBoardFromBoxes(boxes);
+  board = incrementNeighbors(board);
   return board;
 };
 
@@ -49,7 +52,54 @@ const makeBoardFromBoxes = input => {
   return board;
 };
 
-const clickBox = () => {};
+const incrementNeighbors = board => {
+  const n = board.length;
+
+  let i = 0;
+  while (i < n) {
+    let j = 0;
+    while (j < n) {
+      const box = board[i][j];
+      const isMine = box.value === -1;
+      if (isMine) {
+        const allNeighbors = getAllNeighbors(i, j);
+        allNeighbors.forEach(({ x, y }) => {
+          if (x >= 0 && y >= 0 && x < n && y < n) {
+            if (board[x][y].value > -1) {
+              board[x][y].value += 1;
+            }
+          }
+        });
+      }
+      j++;
+    }
+    i++;
+  }
+
+  return board;
+};
+
+const getAllNeighbors = (i, j) => {
+  return [
+    { x: i - 1, y: j - 1 },
+    { x: i, y: j - 1 },
+    { x: i + 1, y: j - 1 },
+    { x: i - 1, y: j },
+    { x: i + 1, y: j },
+    { x: i - 1, y: j + 1 },
+    { x: i, y: j + 1 },
+    { x: i + 1, y: j + 1 }
+  ];
+};
+
+const getAdjacentNeighbors = (i, j) => {
+  return [[i, j - 1], [i - 1, j], [i + 1, j], [i, j + 1]];
+};
+
+const clickBox = (x, y, action) => {
+  // is x,y within the board, and closed
+  //
+};
 
 module.exports = {
   createNewGame,
