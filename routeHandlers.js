@@ -2,11 +2,9 @@ const { createNewGame, clickBox, getCurrentGame } = require("./helpers");
 
 const postGameHandler = (boardSize, mineCount) => {
   if (boardSize ** 2 <= mineCount) {
-    /* ERROR */
+    throw new Error("You must have fewer mines than boxes!");
   }
-  // save that game in memory CURRENT_GAME
   createNewGame(boardSize, mineCount);
-  return { game: getCurrentGame() };
 };
 
 const postClickHandler = (x, y, action) => {

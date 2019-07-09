@@ -9,15 +9,27 @@ const {
 const app = express();
 app.use(bodyParser.json());
 
-// GLOBAL VARIABLE
+// GLOBAL VARIABLES
 CURRENT_GAME = {
   board: [],
   status: "this is the status"
 };
 
+BOX_STATUS = {
+  CLOSED: "closed",
+  OPEN: "open",
+  FLAGGED: "flagged"
+};
+
 app.post("/game", (req, res) => {
   const { boardSize, mineCount } = req.body;
-  postGameHandler(boardSize, mineCount);
+
+  try {
+    postGameHandler(boardSize, mineCount);
+  } catch (err) {
+    res.send({ error: err.message });
+  }
+
   res.send({ game: CURRENT_GAME });
 });
 
