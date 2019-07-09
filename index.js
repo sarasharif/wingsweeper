@@ -9,13 +9,16 @@ const {
 const app = express();
 app.use(bodyParser.json());
 
+// GLOBAL VARIABLE
+CURRENT_GAME = {
+  board: [],
+  status: "this is the status"
+};
+
 app.post("/game", (req, res) => {
-  // requires boardSize & mineCount
-  // returns board (nested array of block statuses)
-  // returns gameStatus = ongoing
   const { boardSize, mineCount } = req.body;
-  const game = postGameHandler(boardSize, mineCount);
-  res.send({ game });
+  postGameHandler(boardSize, mineCount);
+  res.send({ game: CURRENT_GAME });
 });
 
 app.post("/click", (req, res) => {
@@ -25,14 +28,12 @@ app.post("/click", (req, res) => {
   // returns gameStatus = ongoing, lost, won
   const { x, y, action } = req.body;
   const game = postClickHandler(x, y, action);
-  res.send({ game });
+  res.send({ game: CURRENT_GAME });
 });
 
 app.get("/game", (req, res) => {
-  // returns grid
-  // returns gameStatus = ongoing, lost, won
-  const game = getGameHandler();
-  res.send({ game });
+  // const { game } = getGameHandler();
+  res.send({ game: CURRENT_GAME });
 });
 
 app.listen(8080);
