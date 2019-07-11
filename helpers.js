@@ -1,59 +1,32 @@
 const createNewGame = (boardSize, mineCount) => {
   const boxCount = boardSize ** 2;
-  const mineIndices = generateMineIndices(mineCount, boxCount);
-  const board = generateGameBoard(boxCount, mineIndices);
+  const board = generateGameBoard(boxCount, mineCount);
   CURRENT_GAME.board = board;
-  CURRENT_GAME.status = "inPlay";
-  CURRENT_GAME.mines = mineIndices;
+  CURRENT_GAME.status = GAME_STATUS.IN_PLAY;
 };
 
-const generateMineIndices = (mineCount, boxCount) => {
-  mines = [];
-  while (mines.length < mineCount) {
-    const i = Math.floor(Math.random() * boxCount);
-    if (mines.indexOf(i) == -1) {
-      mines.push(i);
-    }
-  }
-  return mines;
-};
+const generateGameBoard = (boxCount, mineCount) => {
+  const boxes = new Array(boxCount).fill().map((_, i) => ({
+    status: BOX_STATUS.CLOSED,
+    value: i < mineCount ? -1 : 0
+  }));
 
-const generateGameBoard = (boxCount, mineIndices) => {
-  // create mineless board
-  const boxes = new Array(boxCount).fill().map(item => {
-    return {
-      status: BOX_STATUS.CLOSED,
-      value: 0
-    };
-  });
-
-  // add mines
-  mineIndices.forEach(index => {
-    boxes[index].value = -1;
-  });
-
-  let board = makeBoardFromBoxes(boxes);
-
-  board = incrementNeighbors(board);
-  return board;
-};
-
-const makeBoardFromBoxes = input => {
-  const boardSize = Math.sqrt(input.length);
-
-  let row;
-  let boxes = input;
-  let board = [];
-  while (board.length < boardSize) {
-    let row = boxes.slice(0, boardSize);
-    boxes = boxes.slice(boardSize);
-    board = [...board, row];
-  }
+  fisherYatesShuffleInPlace(boxes);
+  const board = makeBoardFromBoxes(boxes);
+  incrementNeighborsInPlace(board);
 
   return board;
 };
 
-const incrementNeighbors = board => {
+const makeBoardFromBoxes = boxes => {
+  const n = Math.sqrt(boxes.length);
+  const board = new Array(n)
+    .fill()
+    .map((_, i) => boxes.slice(i * n, (i + 1) * n));
+  return board;
+};
+
+const incrementNeighborsInPlace = board => {
   const n = board.length;
 
   let i = 0;
@@ -63,12 +36,10 @@ const incrementNeighbors = board => {
       const box = board[i][j];
       const isMine = box.value === -1;
       if (isMine) {
-        const allNeighbors = getAllNeighbors(i, j);
+        const allNeighbors = getAllNeighbors(i, j, n);
         allNeighbors.forEach(({ x, y }) => {
-          if (x >= 0 && y >= 0 && x < n && y < n) {
-            if (board[x][y].value > -1) {
-              board[x][y].value += 1;
-            }
+          if (board[x][y].value > -1) {
+            board[x][y].value += 1;
           }
         });
       }
@@ -76,12 +47,10 @@ const incrementNeighbors = board => {
     }
     i++;
   }
-
-  return board;
 };
 
-const getAllNeighbors = (i, j) => {
-  return [
+const getAllNeighbors = (i, j, n) =>
+  [
     { x: i - 1, y: j - 1 },
     { x: i, y: j - 1 },
     { x: i + 1, y: j - 1 },
@@ -90,30 +59,43 @@ const getAllNeighbors = (i, j) => {
     { x: i - 1, y: j + 1 },
     { x: i, y: j + 1 },
     { x: i + 1, y: j + 1 }
-  ];
-};
+  ].filter(({ x, y }) => x >= 0 && y >= 0 && x < n && y < n);
 
-const getAdjacentNeighbors = (i, j) => {
-  return [
+const getNeighbors = (i, j, n) =>
+  [
     { x: i, y: j - 1 },
     { x: i - 1, y: j },
     { x: i + 1, y: j },
     { x: i, y: j + 1 }
-  ];
-};
+  ].filter(({ x, y }) => x >= 0 && y >= 0 && x < n && y < n);
 
-const clickBox = (x, y, action = "open") => {
-  if (action === "open") {
-    if (CURRENT_GAME.board[x][y].value === -1) {
-      CURRENT_GAME.status = GAME_STATUS.LOST;
-    } else if (CURRENT_GAME.board[x][y].value === 0) {
-      // Call getAdjacent Neighbors, push neighbors(value=0) into stack
-      // For each box in stack: pop, call adjacent neighbors, while stack.length > 0;
-    }
-    CURRENT_GAME.board[x][y].status = BOX_STATUS.OPEN;
-  }
+const clickBox = (i, j, action = "open") => {
   if (action === "flagged") {
     CURRENT_GAME.board[x][y].status = BOX_STATUS.FLAGGED;
+  } else {
+    CURRENT_GAME.board[i][j].status = BOX_STATUS.OPEN;
+    if (CURRENT_GAME.board[i][j].value === -1) {
+      CURRENT_GAME.status = GAME_STATUS.LOST;
+    } else if (CURRENT_GAME.board[i][j].value === 0) {
+      let boxesToOpen = getNeighbors(i, j, CURRENT_GAME.board.length);
+      while (boxesToOpen.length) {
+        const { x, y } = boxesToOpen.splice(0, 1)[0];
+        CURRENT_GAME.board[x][y].status = BOX_STATUS.OPEN;
+        if (CURRENT_GAME.board[x][y].value == 0) {
+          const more = getNeighbors(x, y, CURRENT_GAME.board.length).filter(
+            ({ x, y }) => CURRENT_GAME.board[x][y].status == BOX_STATUS.CLOSED
+          );
+          boxesToOpen = [...boxesToOpen, ...more];
+        }
+      }
+    }
+  }
+};
+
+const fisherYatesShuffleInPlace = array => {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
 };
 
