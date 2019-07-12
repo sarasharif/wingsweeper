@@ -19,33 +19,15 @@ BOX_STATUS = {
 };
 
 CURRENT_GAME = {
-  board: [],
-  status: GAME_STATUS.IN_PLAY
+  board: null,
+  status: null
 };
 
-app.post("/game", (req, res) => {
-  const { boardSize, mineCount } = req.body;
+app.post("/game", postGameHandler);
 
-  try {
-    postGameHandler(boardSize, mineCount);
-  } catch (err) {
-    res.send({ error: err.message });
-  }
+app.post("/click", postClickHandler);
 
-  res.send({ game: CURRENT_GAME });
-});
-
-app.post("/click", (req, res) => {
-  const { x, y, action } = req.body;
-  try {
-    postClickHandler(x, y, action);
-  } catch (err) {
-    res.send({ error: err.message });
-  }
-  res.send({ game: CURRENT_GAME });
-});
-
-app.get("/game", (req, res) => {
+app.get("/game", (_, res) => {
   res.send({ game: CURRENT_GAME });
 });
 

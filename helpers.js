@@ -1,8 +1,7 @@
 const createNewGame = (boardSize, mineCount) => {
   const boxCount = boardSize ** 2;
   const board = generateGameBoard(boxCount, mineCount);
-  CURRENT_GAME.board = board;
-  CURRENT_GAME.status = GAME_STATUS.IN_PLAY;
+  return board;
 };
 
 const generateGameBoard = (boxCount, mineCount) => {
@@ -69,7 +68,7 @@ const getNeighbors = (i, j, n) =>
     { x: i, y: j + 1 }
   ].filter(({ x, y }) => x >= 0 && y >= 0 && x < n && y < n);
 
-const clickBox = (i, j, action = "open") => {
+const clickBox = (i, j, action) => {
   if (action === "flagged") {
     CURRENT_GAME.board[x][y].status = BOX_STATUS.FLAGGED;
   } else {
