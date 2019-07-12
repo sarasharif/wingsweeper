@@ -1,3 +1,5 @@
+const { BOX_STATUS, BOX_VALUE } = require("./constants");
+
 const createNewGame = (boardSize, mineCount) => {
   const boxCount = boardSize ** 2;
   const board = generateGameBoard(boxCount, mineCount);
@@ -70,26 +72,35 @@ const getNeighbors = (i, j, n) =>
 
 const clickBox = (i, j, action) => {
   if (action === "flagged") {
-    CURRENT_GAME.board[x][y].status = BOX_STATUS.FLAGGED;
+    flagBox(i, j);
+  } else if (isMine(i, j)) {
+    CURRENT_GAME.status = GAME_STATUS.LOST;
   } else {
-    CURRENT_GAME.board[i][j].status = BOX_STATUS.OPEN;
-    if (CURRENT_GAME.board[i][j].value === -1) {
-      CURRENT_GAME.status = GAME_STATUS.LOST;
-    } else if (CURRENT_GAME.board[i][j].value === 0) {
-      let boxesToOpen = getNeighbors(i, j, CURRENT_GAME.board.length);
-      while (boxesToOpen.length) {
-        const { x, y } = boxesToOpen.splice(0, 1)[0];
-        CURRENT_GAME.board[x][y].status = BOX_STATUS.OPEN;
-        if (CURRENT_GAME.board[x][y].value == 0) {
-          const more = getNeighbors(x, y, CURRENT_GAME.board.length).filter(
-            ({ x, y }) => CURRENT_GAME.board[x][y].status == BOX_STATUS.CLOSED
-          );
-          boxesToOpen = [...boxesToOpen, ...more];
-        }
+    let boxesToOpen = [{ x: i, y: j }];
+    while (boxesToOpen.length) {
+      const { x, y } = boxesToOpen.splice(0, 1)[0];
+      openBox(x, y);
+      if (isZero(x, y)) {
+        const more = getNeighbors(x, y, CURRENT_GAME.board.length).filter(
+          ({ x, y }) => CURRENT_GAME.board[x][y].status == BOX_STATUS.CLOSED
+        );
+        boxesToOpen = [...boxesToOpen, ...more];
       }
     }
   }
 };
+
+const flagBox = (i, j) => {
+  CURRENT_GAME.board[i][j].status = BOX_STATUS.FLAGGED;
+};
+
+const openBox = (i, j) => {
+  CURRENT_GAME.board[i][j].status = BOX_STATUS.OPEN;
+};
+
+const isMine = (i, j) => CURRENT_GAME.board[i][j].value == BOX_VALUE.MINE;
+
+const isZero = (i, j) => CURRENT_GAME.board[i][j].value == 0;
 
 const fisherYatesShuffleInPlace = array => {
   for (let i = array.length - 1; i > 0; i--) {

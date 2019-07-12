@@ -1,4 +1,5 @@
-const { createNewGame, clickBox, getCurrentGame } = require("./helpers");
+const { createNewGame, clickBox } = require("./helpers");
+const { GAME_STATUS } = require("./constants");
 
 const postGameHandler = (req, res) => {
   const { boardSize, mineCount } = req.body;
@@ -18,9 +19,12 @@ const postGameHandler = (req, res) => {
 };
 
 const postClickHandler = (req, res) => {
+  if (!CURRENT_GAME.board || CURRENT_GAME.status != GAME_STATUS.IN_PLAY) {
+    throw new Error("You must create a new game.");
+  }
+
   const { x, y, action } = req.body;
   const n = CURRENT_GAME.board.length;
-
   if (x < 0 || y < 0 || x >= n || y >= n) {
     throw new Error("Those are not valid coordinates");
   }

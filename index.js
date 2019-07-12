@@ -6,18 +6,6 @@ const app = express();
 app.use(bodyParser.json());
 
 // GLOBAL VARIABLES
-GAME_STATUS = {
-  LOST: "lost",
-  WON: "won",
-  IN_PLAY: "inPlay"
-};
-
-BOX_STATUS = {
-  CLOSED: "closed",
-  OPEN: "open",
-  FLAGGED: "flagged"
-};
-
 CURRENT_GAME = {
   board: null,
   status: null
